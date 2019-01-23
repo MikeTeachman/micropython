@@ -190,6 +190,7 @@ SRC_C = \
 	modesp32.c \
 	espneopixel.c \
 	machine_hw_spi.c \
+	machine_i2s.c \
 	machine_wdt.c \
 	mpthreadport.c \
 	machine_rtc.c \
@@ -267,6 +268,7 @@ ESPIDF_DRIVER_O = $(addprefix $(ESPCOMP)/driver/,\
 	spi_master.o \
 	spi_common.o \
 	rtc_module.o \
+	i2s.o \
 	)
 
 $(BUILD)/$(ESPCOMP)/esp32/dport_access.o: CFLAGS += -Wno-array-bounds
