@@ -27,6 +27,7 @@
 #include <string.h>
 #include "py/obj.h"
 #include "py/runtime.h"
+#include "py/stream.h"
 #include "modmachine.h"
 #include "mphalport.h"
 #include "driver/i2s.h"
@@ -408,9 +409,12 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_1(machine_i2s_deinit_obj, machine_i2s_deinit);
 STATIC const mp_rom_map_elem_t machine_i2s_locals_dict_table[] = {
     // Methods
     { MP_ROM_QSTR(MP_QSTR_init),            MP_ROM_PTR(&machine_i2s_init_obj) },
-    { MP_ROM_QSTR(MP_QSTR_readinto),        MP_ROM_PTR(&machine_i2s_readinto_obj) },
     { MP_ROM_QSTR(MP_QSTR_write),           MP_ROM_PTR(&machine_i2s_write_obj) },
+    //{ MP_ROM_QSTR(MP_QSTR_readinto),        MP_ROM_PTR(&machine_i2s_readinto_obj) },
     { MP_ROM_QSTR(MP_QSTR_deinit),          MP_ROM_PTR(&machine_i2s_deinit_obj) },
+
+    // Stream Methods
+    { MP_ROM_QSTR(MP_QSTR_readinto),        MP_ROM_PTR(&mp_stream_readinto_obj) },
 
     // Constants
     { MP_ROM_QSTR(MP_QSTR_NUM0),            MP_ROM_INT(I2S_NUM_0) },
@@ -431,10 +435,109 @@ STATIC const mp_rom_map_elem_t machine_i2s_locals_dict_table[] = {
 };
 MP_DEFINE_CONST_DICT(machine_i2s_locals_dict, machine_i2s_locals_dict_table);
 
+STATIC mp_uint_t machine_i2s_stream_read(mp_obj_t self_in, void *buf_in, mp_uint_t size, int *errcode) {
+    machine_i2s_obj_t *self = MP_OBJ_TO_PTR(self_in);
+
+    // make sure we want at least 1 char
+    if (size == 0) {
+        return 0;
+    }
+
+    if (!self->used) {
+        *errcode = MP_EPERM;
+    }
+
+    if (self->mode != (I2S_MODE_MASTER | I2S_MODE_RX)) {
+        *errcode = MP_EPERM;
+    }
+
+    uint32_t num_bytes_read = 0;
+    esp_err_t ret = i2s_read(self->id, buf_in, size, &num_bytes_read, 0);
+    switch (ret) {
+        case ESP_OK:
+            break;
+        case ESP_ERR_INVALID_ARG:
+            *errcode = MP_EPERM;
+            break;
+        default:
+            *errcode = MP_EPERM;
+            break;
+    }
+
+    return num_bytes_read;
+}
+
+STATIC mp_uint_t machine_i2s_stream_write(mp_obj_t self_in, const void *buf_in, mp_uint_t size, int *errcode) {
+
+    // TODO implement stream write in a similar way as stream read.
+
+    return 0;
+}
+
+STATIC mp_uint_t machine_i2s_ioctl(mp_obj_t self_in, mp_uint_t request, mp_uint_t arg, int *errcode) {
+    machine_i2s_obj_t *self = self_in;
+    mp_uint_t ret;
+    mp_uint_t flags = arg;
+    uint32_t num_bytes_available = 0;
+
+    if (request == MP_STREAM_POLL) {
+        ret = 0;
+
+        if (flags & MP_STREAM_POLL_RD) {
+            esp_err_t esp_ret = i2s_read_peek(self->id, &num_bytes_available);
+            switch (esp_ret) {
+                case ESP_OK:
+                    break;
+                default:
+                    *errcode = MP_EPERM;
+                    break;
+            }
+
+            if (num_bytes_available > 0) {
+                ret |= MP_STREAM_POLL_RD;
+            }
+        }
+
+        if (flags & MP_STREAM_POLL_WR) {
+#if 0
+            // TODO implement i2s_write_peek() which is an extension of
+            // the i2s driver in the ESP-IDF
+            esp_err_t esp_ret = i2s_write_peek(self->id, &num_bytes_available);
+            switch (esp_ret) {
+                case ESP_OK:
+                    break;
+                default:
+                    *errcode = MP_EPERM;
+                    break;
+            }
+
+            if (num_bytes_available > 0) {
+                ret |= MP_STREAM_POLL_WR;
+            }
+#endif
+        }
+    } else {
+        *errcode = MP_EINVAL;
+        ret = MP_STREAM_ERROR;
+    }
+
+    return ret;
+}
+
+STATIC const mp_stream_p_t i2s_stream_p = {
+    .read = machine_i2s_stream_read,
+    .write = machine_i2s_stream_write,
+    .ioctl = machine_i2s_ioctl,
+    .is_text = false,
+};
+
 const mp_obj_type_t machine_i2s_type = {
     { &mp_type_type },
     .name = MP_QSTR_I2S,
     .print = machine_i2s_print,
+    .getiter = mp_identity_getiter,
+    .iternext = mp_stream_unbuffered_iter,
+    .protocol = &i2s_stream_p,
     .make_new = machine_i2s_make_new,
     .locals_dict = (mp_obj_dict_t *) &machine_i2s_locals_dict,
 };
