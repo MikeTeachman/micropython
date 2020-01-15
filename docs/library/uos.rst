@@ -112,7 +112,7 @@ Filesystem access
 Terminal redirection and duplication
 ------------------------------------
 
-.. function:: dupterm(stream_object, index=0)
+.. function:: dupterm(stream_object, index=0, /)
 
    Duplicate or switch the MicroPython terminal (the REPL) on the given `stream`-like
    object. The *stream_object* argument must be a native stream object, or derive
@@ -191,6 +191,9 @@ represented by VFS classes.
 
         Build a Lfs1 filesystem on *block_dev*.
 
+    .. note:: There are reports of littlefs v1 failing in certain situations,
+              for details see `littlefs issue 347`_.
+
 .. class:: VfsLfs2(block_dev)
 
     Create a filesystem object that uses the `littlefs v2 filesystem format`_.
@@ -204,8 +207,13 @@ represented by VFS classes.
 
         Build a Lfs2 filesystem on *block_dev*.
 
+    .. note:: There are reports of littlefs v2 failing in certain situations,
+              for details see `littlefs issue 295`_.
+
 .. _littlefs v1 filesystem format: https://github.com/ARMmbed/littlefs/tree/v1
 .. _littlefs v2 filesystem format: https://github.com/ARMmbed/littlefs
+.. _littlefs issue 295: https://github.com/ARMmbed/littlefs/issues/295
+.. _littlefs issue 347: https://github.com/ARMmbed/littlefs/issues/347
 
 Block devices
 -------------
@@ -225,6 +233,10 @@ There are two compatible signatures for the ``readblocks`` and ``writeblocks``
 methods (see below), in order to support a variety of use cases.  A given block
 device may implement one form or the other, or both at the same time. The second
 form (with the offset parameter) is referred to as the "extended interface".
+
+Some filesystems (such as littlefs) that require more control over write
+operations, for example writing to sub-block regions without erasing, may require
+that the block device supports the extended interface.
 
 .. class:: AbstractBlockDev(...)
 

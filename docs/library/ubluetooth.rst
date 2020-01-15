@@ -12,6 +12,9 @@ roles concurrently.
 This API is intended to match the low-level Bluetooth protocol and provide
 building-blocks for higher-level abstractions such as specific device types.
 
+.. note:: This module is still under development and its classes, functions,
+          methods and constants are subject to change.
+
 class BLE
 ---------
 
@@ -265,7 +268,7 @@ writes from a central to a given characteristic, use
     of the notification, avoiding the need for a separate read request. Note
     that this will not update the local value stored.
 
-.. method:: BLE.gatts_set_buffer(value_handle, len, append=False)
+.. method:: BLE.gatts_set_buffer(value_handle, len, append=False, /)
 
     Sets the internal buffer size for a value in bytes. This will limit the
     largest possible write that can be received. The default is 20.
@@ -280,7 +283,7 @@ writes from a central to a given characteristic, use
 Central Role (GATT Client)
 --------------------------
 
-.. method:: BLE.gap_connect(addr_type, addr, scan_duration_ms=2000)
+.. method:: BLE.gap_connect(addr_type, addr, scan_duration_ms=2000, /)
 
     Connect to a peripheral.
 
@@ -323,7 +326,7 @@ Central Role (GATT Client)
 
     On success, the ``_IRQ_GATTC_READ_RESULT`` event will be raised.
 
-.. method:: BLE.gattc_write(conn_handle, value_handle, data, mode=0)
+.. method:: BLE.gattc_write(conn_handle, value_handle, data, mode=0, /)
 
     Issue a remote write to a connected peripheral for the specified
     characteristic or descriptor handle.

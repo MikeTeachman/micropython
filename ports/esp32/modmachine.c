@@ -46,6 +46,7 @@
 
 #include "py/obj.h"
 #include "py/runtime.h"
+#include "lib/utils/pyexec.h"
 #include "extmod/machine_mem.h"
 #include "extmod/machine_signal.h"
 #include "extmod/machine_pulse.h"
@@ -224,6 +225,12 @@ STATIC mp_obj_t machine_reset(void) {
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(machine_reset_obj, machine_reset);
 
+STATIC mp_obj_t machine_soft_reset(void) {
+    pyexec_system_exit = PYEXEC_FORCED_EXIT;
+    nlr_raise(mp_obj_new_exception(&mp_type_SystemExit));
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(machine_soft_reset_obj, machine_soft_reset);
+
 STATIC mp_obj_t machine_unique_id(void) {
     uint8_t chipid[6];
     esp_efuse_mac_get_default(chipid);
@@ -259,6 +266,7 @@ STATIC const mp_rom_map_elem_t machine_module_globals_table[] = {
 
     { MP_ROM_QSTR(MP_QSTR_freq), MP_ROM_PTR(&machine_freq_obj) },
     { MP_ROM_QSTR(MP_QSTR_reset), MP_ROM_PTR(&machine_reset_obj) },
+    { MP_ROM_QSTR(MP_QSTR_soft_reset), MP_ROM_PTR(&machine_soft_reset_obj) },
     { MP_ROM_QSTR(MP_QSTR_unique_id), MP_ROM_PTR(&machine_unique_id_obj) },
     { MP_ROM_QSTR(MP_QSTR_sleep), MP_ROM_PTR(&machine_lightsleep_obj) },
     { MP_ROM_QSTR(MP_QSTR_lightsleep), MP_ROM_PTR(&machine_lightsleep_obj) },

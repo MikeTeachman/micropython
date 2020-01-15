@@ -95,6 +95,15 @@ CFLAGS += -I$(BOARD_DIR)
 CFLAGS += -DSTM32_HAL_H='<stm32$(MCU_SERIES)xx_hal.h>'
 CFLAGS += -DMICROPY_HW_VTOR=$(TEXT0_ADDR)
 
+# Configure for nan-boxing object model if requested
+ifeq ($(NANBOX),1)
+CFLAGS += -DMP_CONFIGFILE='"mpconfigport_nanbox.h"'
+ifneq ($(MICROPY_FLOAT_IMPL),none)
+MICROPY_FLOAT_IMPL = double
+endif
+endif
+
+# Configure floating point support
 ifeq ($(MICROPY_FLOAT_IMPL),double)
 CFLAGS += -DMICROPY_FLOAT_IMPL=MICROPY_FLOAT_IMPL_DOUBLE
 else
@@ -408,6 +417,10 @@ ifneq ($(MICROPY_PY_WIZNET5K),0)
 WIZNET5K_DIR=drivers/wiznet5k
 INC += -I$(TOP)/$(WIZNET5K_DIR)
 CFLAGS_MOD += -DMICROPY_PY_WIZNET5K=$(MICROPY_PY_WIZNET5K) -D_WIZCHIP_=$(MICROPY_PY_WIZNET5K)
+ifeq ($(MICROPY_PY_LWIP),1)
+# When using MACRAW mode (with lwIP), maximum buffer space must be used for the raw socket
+CFLAGS_MOD += -DWIZCHIP_USE_MAX_BUFFER
+endif
 SRC_MOD += network_wiznet5k.c modnwwiznet5k.c
 SRC_MOD += $(addprefix $(WIZNET5K_DIR)/,\
 	ethernet/w$(MICROPY_PY_WIZNET5K)/w$(MICROPY_PY_WIZNET5K).c \

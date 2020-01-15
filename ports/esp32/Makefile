@@ -68,7 +68,7 @@ ESPIDF = $(IDF_PATH)
 else
 $(info The ESPIDF variable has not been set, please set it to the root of the esp-idf repository.)
 $(info See README.md for installation instructions.)
-$(call print_supported_git_hash)
+dummy := $(call print_supported_git_hash)
 $(error ESPIDF not set)
 endif
 endif
@@ -100,7 +100,7 @@ $(info The git hash of ESP IDF does not match the supported version)
 $(info The build may complete and the firmware may work but it is not guaranteed)
 $(info ESP IDF path:       $(ESPIDF))
 $(info Current git hash:   $(ESPIDF_CURHASH))
-$(call print_supported_git_hash)
+dummy := $(call print_supported_git_hash)
 endif
 
 # pretty format of ESP IDF version, used internally by the IDF
@@ -324,6 +324,7 @@ SRC_C = \
 	modsocket.c \
 	modesp.c \
 	esp32_partition.c \
+	esp32_rmt.c \
 	esp32_ulp.c \
 	modesp32.c \
 	espneopixel.c \
@@ -387,8 +388,8 @@ LIB_SRC_C += \
 	lib/lv_binding_micropython/myfonts/lv_font_roboto_mono_50.c \
 	lib/lv_binding_micropython/myfonts/lv_font_roboto_mono_60.c \
 	lib/lv_binding_micropython/myfonts/lv_font_roboto_mono_70.c \
-	lib/lv_binding_micropython/myfonts/lv_font_roboto_mono_80.c \
-	lib/lv_binding_micropython/myfonts/lv_font_roboto_mono_100.c \
+	lib/lv_binding_micropython/myfonts/lv_font_seven_segment_80.c \
+	lib/lv_binding_micropython/myfonts/lv_font_seven_segment_100.c \
 	lib/lv_binding_micropython/myfonts/lv_font_roboto_120.c \
 	$(CSRCS)
 endif

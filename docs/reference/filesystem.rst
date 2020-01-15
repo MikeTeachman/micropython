@@ -124,7 +124,7 @@ interface (i.e. both signatures and behaviours of the
             self.block_size = block_size
             self.data = bytearray(block_size * num_blocks)
 
-        def readblocks(self, block, buf, offset=0):
+        def readblocks(self, block_num, buf, offset=0):
             addr = block_num * self.block_size + offset
             for i in range(len(buf)):
                 buf[i] = self.data[addr + i]
@@ -155,6 +155,13 @@ As it supports the extended interface, it can be used with :class:`littlefs
     bdev = RAMBlockDev(512, 50)
     os.VfsLfs2.mkfs(bdev)
     os.mount(bdev, '/ramdisk')
+
+Once mounted, the filesystem (regardless of its type) can be used as it
+normally would be used from Python code, for example::
+
+    with open('/ramdisk/hello.txt', 'w') as f:
+        f.write('Hello world')
+    print(open('/ramdisk/hello.txt').read())
 
 Filesystems
 -----------
@@ -207,13 +214,18 @@ Littlefs
 Littlefs_ is a filesystem designed for flash-based devices, and is much more
 resistant to filesystem corruption.
 
+.. note:: There are reports of littlefs v1 and v2 failing in certain
+          situations, for details see `littlefs issue 347`_  and
+          `littlefs issue 295`_.
+
 Note: It can be still be accessed over USB MSC using the `littlefs FUSE
 driver`_. Note that you must use the ``-b=4096`` option to override the block
 size.
 
 .. _littlefs FUSE driver: https://github.com/ARMmbed/littlefs-fuse/tree/master/littlefs
-
 .. _Littlefs: https://github.com/ARMmbed/littlefs
+.. _littlefs issue 295: https://github.com/ARMmbed/littlefs/issues/295
+.. _littlefs issue 347: https://github.com/ARMmbed/littlefs/issues/347
 
 To format the entire flash using littlefs v2::
 
