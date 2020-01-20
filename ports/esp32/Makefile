@@ -359,6 +359,29 @@ LIB_SRC_C += \
 	lib/oofatfs/ffunicode.c
 endif
 
+
+#>>>>	#esp-idf generated module
+#>>>>	ESPIDFMOD_SOURCE = $(TOP)/lib/lv_bindings/driver/esp32/espidf.h
+#>>>>	ALL_ESPIDFMOD_SRC = $(shell find $(subst -I,,$(INC_ESPCOMP)) -type f) $(ESPIDFMOD_SOURCE) $(SDKCONFIG_H)
+#>>>>	ESPIDFMOD_MODULE = $(BUILD)/espidfmod/mp_espidf.c
+#>>>>	ESPIDFMOD_PP = $(BUILD)/espidfmod/mp_espidf.pp.c
+#>>>>	CFLAGS_MOD += $(ESPIDFMOD_CFLAGS) -Wno-deprecated-declarations
+#
+#>>>>	$(ESPIDFMOD_MODULE): $(ALL_ESPIDFMOD_SRC) $(LVGL_BINDING_DIR)/gen/gen_mpy.py
+#>>>>		$(ECHO) "ESPIDFMOD-GEN $@"
+#>>>>		$(Q)mkdir -p $(dir $@)
+#>>>>		$(Q)$(CPP) $(ESPIDFMOD_CFLAGS) -DPYCPARSER -I $(LVGL_BINDING_DIR)/pycparser/utils/fake_libc_include $(INC) $(INC_ESPCOMP) $(ESPIDFMOD_SOURCE) > $(ESPIDFMOD_PP)
+#>>>>		$(Q)$(PYTHON) $(LVGL_BINDING_DIR)/gen/gen_mpy.py -M espidf -E $(ESPIDFMOD_PP) $(ESPIDFMOD_SOURCE) > $@
+#
+#>>>>	LIB_SRC_C += \
+#	lib/lv_bindings/driver/esp32/modlvesp32.c \
+#	lib/lv_bindings/driver/esp32/modrtch.c \
+#>>>>	lib/lv_bindings/driver/esp32/espidf.c \
+#>>>>	$(ESPIDFMOD_MODULE) \
+#	lib/lv_bindings/driver/esp32/modxpt2046.c \
+#	lib/lv_bindings/driver/esp32/modILI9341.c \
+
+
 ################################################################################
 # start LittlevGL support
 ifeq ($(MICROPY_PY_LVGL), 1)
@@ -372,7 +395,14 @@ LVGL_PP = $(BUILD)/lvgl/lvgl.pp.c
 LVGL_MPY = $(BUILD)/lvgl/lv_mpy.c
 LVGL_MPY_METADATA = $(BUILD)/lvgl/lv_mpy.json
 QSTR_GLOBAL_DEPENDENCIES += $(LVGL_MPY)
-CFLAGS_MOD += $(LV_CFLAGS) 
+
+#esp-idf generated module
+ESPIDFMOD_SOURCE = $(TOP)/lib/lv_binding_micropython/driver/esp32/espidf.h
+ALL_ESPIDFMOD_SRC = $(shell find $(subst -I,,$(INC_ESPCOMP)) -type f) $(ESPIDFMOD_SOURCE) $(SDKCONFIG_H)
+ESPIDFMOD_MODULE = $(BUILD)/espidfmod/mp_espidf.c
+ESPIDFMOD_PP = $(BUILD)/espidfmod/mp_espidf.pp.c
+
+CFLAGS_MOD += $(LV_CFLAGS) $(ESPIDFMOD_CFLAGS) -Wno-deprecated-declarations
 
 $(LVGL_MPY): $(ALL_LVGL_SRC) $(LVGL_DIR)/gen/gen_mpy.py 
 	$(ECHO) "LVGL-GEN $@"
@@ -380,19 +410,30 @@ $(LVGL_MPY): $(ALL_LVGL_SRC) $(LVGL_DIR)/gen/gen_mpy.py
 	$(Q)$(CPP) $(LV_CFLAGS) -I $(LVGL_DIR)/pycparser/utils/fake_libc_include $(INC) $(LVGL_DIR_2)/lvgl.h > $(LVGL_PP)
 	$(Q)$(PYTHON) $(LVGL_DIR)/gen/gen_mpy.py -M lvgl -MP lv -MD $(LVGL_MPY_METADATA) -E $(LVGL_PP) $(LVGL_DIR_2)/lvgl.h > $@
 	
+$(ESPIDFMOD_MODULE): $(ALL_ESPIDFMOD_SRC) $(LVGL_DIR)/gen/gen_mpy.py
+	$(ECHO) "ESPIDFMOD-GEN $@"
+	$(Q)mkdir -p $(dir $@)
+	$(Q)$(CPP) $(ESPIDFMOD_CFLAGS) -DPYCPARSER -I $(LVGL_DIR)/pycparser/utils/fake_libc_include $(INC) $(INC_ESPCOMP) $(ESPIDFMOD_SOURCE) > $(ESPIDFMOD_PP)
+	$(Q)$(PYTHON) $(LVGL_DIR)/gen/gen_mpy.py -M espidf -E $(ESPIDFMOD_PP) $(ESPIDFMOD_SOURCE) > $@
+
 LIB_SRC_C += \
 	$(LVGL_MPY) \
 	lib/lv_binding_micropython/driver/esp32/modlvesp32.c \
+	lib/lv_binding_micropython/driver/esp32/espidf.c \
+	$(ESPIDFMOD_MODULE) \
 	lib/lv_binding_micropython/driver/esp32/modILI9341.c \
-	lib/lv_binding_micropython/myfonts/lv_font_roboto_mono_40.c \
-	lib/lv_binding_micropython/myfonts/lv_font_roboto_mono_50.c \
-	lib/lv_binding_micropython/myfonts/lv_font_roboto_mono_60.c \
-	lib/lv_binding_micropython/myfonts/lv_font_roboto_mono_70.c \
 	lib/lv_binding_micropython/myfonts/lv_font_seven_segment_80.c \
 	lib/lv_binding_micropython/myfonts/lv_font_seven_segment_100.c \
-	lib/lv_binding_micropython/myfonts/lv_font_roboto_120.c \
 	$(CSRCS)
 endif
+
+#	lib/lv_binding_micropython/myfonts/lv_font_roboto_mono_40.c \
+#	lib/lv_binding_micropython/myfonts/lv_font_roboto_mono_50.c \
+#	lib/lv_binding_micropython/myfonts/lv_font_roboto_mono_60.c \
+#	lib/lv_binding_micropython/myfonts/lv_font_roboto_mono_70.c \
+#   lib/lv_binding_micropython/myfonts/lv_font_roboto_120.c \
+
+
 # end LittlevGL support
 
 

@@ -5,3 +5,4 @@ freeze('C:/Users/miket/Documents/micropython_projects/micropython-async', ('uasy
 freeze('C:/Users/miket/Documents/micropython_projects/Adafruit-uRTC', ('urtc.py'))
 freeze('C:/Users/miket/Documents/micropython_projects/micropython-rotary', ('rotary.py', 'rotary_irq_esp.py'))
 #freeze('C:/Users/miket/Documents/micropython_projects/alarmclock', ('alarmclock.py'))
+freeze('C:/Users/miket/Documents/micropython_projects/build-alarm-clock/lib/lv_binding_micropython/driver/esp32', ('ili9341.py'))
